@@ -28,6 +28,7 @@
 }
 
 .text-field, .password-field {
+    -fx-text-fill: white;
     -fx-background-color: transparent;
     -fx-border-width: 0 0 2 0;
     -fx-border-color: #ccc;
