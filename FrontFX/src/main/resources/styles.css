@@ -82,3 +82,17 @@
     -fx-text-fill: #4B0082;
     -fx-border-color: #4B0082;
 }
+
+.date-picker {
+    -fx-background-color: transparent;
+    -fx-border-color: white;
+    -fx-border-width: 0 0 2 0;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+}
+.date-picker .text-field {
+    -fx-text-fill: white;
+}
+.date-picker:hover {
+    -fx-border-color: #c0aaff;
+}
