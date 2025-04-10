@@ -34,11 +34,15 @@ public class comprarViajes {
         pesoTotalEquipaje.setDisable(true);
 
         CheckBox hayEquipaje = new CheckBox("¿Equipaje?");
+        hayEquipaje.setStyle("-fx-padding: 30 0 0 0;");
         hayEquipaje.setOnAction(e -> {
             boolean seleccionado = hayEquipaje.isSelected();
             cantidadEquipaje.setDisable(!seleccionado);
             pesoTotalEquipaje.setDisable(!seleccionado);
         });
+
+        DatePicker fechaViaje = new DatePicker();
+        fechaViaje.setPromptText("Fecha para tu Viaje?");
 
         Label mensaje = new Label();
         mensaje.setId("feedback");
@@ -49,6 +53,7 @@ public class comprarViajes {
                 idUsuario.getText().isEmpty() ||
                 ciudadOrigen.getValue() == null ||
                 ciudadDestino.getValue() == null ||
+                fechaViaje.getValue() == null ||
                 (hayEquipaje.isSelected() && cantidadEquipaje.getText().isEmpty() && pesoTotalEquipaje.getText().isEmpty())
                 ) {
                 mensaje.setText("Completa todos los campos.");
@@ -68,6 +73,7 @@ public class comprarViajes {
             idUsuario,
             ciudadOrigen,
             ciudadDestino,
+            fechaViaje,
             hayEquipaje,
             cantidadEquipaje,
             pesoTotalEquipaje,
