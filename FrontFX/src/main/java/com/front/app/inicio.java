@@ -27,6 +27,14 @@ public class inicio {
             stage.setTitle("Envios");
         });
 
+        Button sedesBtn = new Button("Sedes");
+        sedesBtn.setId("boton-inicio");
+        sedesBtn.setOnMouseClicked((MouseEvent e) -> {
+            Scene escenaSedes = sedes.crearEscena(stage);
+            stage.setScene(escenaSedes);
+            stage.setTitle("Sedes");
+        });
+
         Label login = new Label("¿Administrador?, Logueate");
         login.setStyle("-fx-text-fill: blue; -fx-underline: true; -fx-font-size: 12px;");
         login.setOnMouseClicked((MouseEvent e) -> {
@@ -35,7 +43,7 @@ public class inicio {
             stage.setTitle("Login");
         });
 
-        HBox botonesCentro = new HBox(20, comprarViajesBtn, comprarEnviosBtn);
+        HBox botonesCentro = new HBox(20, comprarViajesBtn, comprarEnviosBtn, sedesBtn);
         botonesCentro.setAlignment(Pos.CENTER);
 
         BorderPane root = new BorderPane();

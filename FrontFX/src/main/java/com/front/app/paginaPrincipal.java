@@ -29,8 +29,8 @@ public class paginaPrincipal {
         Button sedesBtn = new Button("Datos sobre sedes");
         sedesBtn.setId("boton-grande");
         sedesBtn.setOnAction(e -> {
-            Scene escenaLogin = iniciarSesion.crearEscena(stage);
-            App.cambiarEscena(escenaLogin, "Inicio de Sesión");
+            Scene escenaSedes = sedes.crearEscena(stage);
+            App.cambiarEscena(escenaSedes, "Gestión de Sedes");
         });
 
         Button viajesBtn = new Button("Datos sobre viajes");
