@@ -43,9 +43,10 @@ public class paginaPrincipal {
         Button empleadosBtn = new Button("Datos sobre empleados");
         empleadosBtn.setId("boton-grande");
         empleadosBtn.setOnAction(e -> {
-            Scene escenaLogin = iniciarSesion.crearEscena(stage);
-            App.cambiarEscena(escenaLogin, "Inicio de Sesión");
+            Scene escenaGestionEmpleados = empleados.crearEscena(stage);
+            App.cambiarEscena(escenaGestionEmpleados, "Gestión de Empleados");
         });
+
 
         Button empresasBtn = new Button("Datos sobre empresas");
         empresasBtn.setId("boton-grande");
