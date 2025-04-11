@@ -50,8 +50,9 @@ public class paginaPrincipal {
         Button empresasBtn = new Button("Datos sobre empresas");
         empresasBtn.setId("boton-grande");
         empresasBtn.setOnAction(e -> {
-            Scene escenaLogin = iniciarSesion.crearEscena(stage);
-            App.cambiarEscena(escenaLogin, "Inicio de Sesión");
+            GestionEmpresas gestion = new GestionEmpresas();
+            Scene escenaEmpresas = gestion.crearEscena(stage); // Usa el 'stage' ya existente
+            App.cambiarEscena(escenaEmpresas, "Gestión de Empresas");
         });
 
         Button volverBtn = new Button("Volver al inicio de sesion");
