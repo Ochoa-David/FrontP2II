@@ -36,9 +36,10 @@ public class paginaPrincipal {
         Button viajesBtn = new Button("Datos sobre viajes");
         viajesBtn.setId("boton-grande");
         viajesBtn.setOnAction(e -> {
-            Scene escenaLogin = iniciarSesion.crearEscena(stage);
-            App.cambiarEscena(escenaLogin, "Inicio de Sesión");
+            Scene escenaViajes = viajes.crearEscena(stage);  
+            App.cambiarEscena(escenaViajes, "Listado de Viajes");  
         });
+
 
         Button empleadosBtn = new Button("Datos sobre empleados");
         empleadosBtn.setId("boton-grande");
