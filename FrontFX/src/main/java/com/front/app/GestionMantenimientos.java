@@ -526,8 +526,13 @@ public class GestionMantenimientos extends Application {
             
             dialog.getDialogPane().setContent(grid);
             
-            // Aplicar estilos CSS al diálogo
-            dialog.getDialogPane().getStylesheets().add("data:text/css,".replace("\n", ""));
+            // Aplicar la hoja de estilos del proyecto al diálogo
+            try {
+                dialog.getDialogPane().getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+            } catch (Exception ex) {
+                registrarExcepcion(ex);
+                mostrarAlerta("Error de estilos", "No se pudo cargar la hoja de estilos: " + ex.getMessage());
+            }
             
             // Mostrar diálogo
             dialog.showAndWait();
@@ -556,7 +561,11 @@ public class GestionMantenimientos extends Application {
         
         // Aplicar estilos a la alerta
         DialogPane dialogPane = alert.getDialogPane();
-        dialogPane.getStylesheets().add("data:text/css,".replace("\n", ""));
+        try {
+            dialogPane.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+        } catch (Exception ex) {
+            System.err.println("Error al cargar estilos para alerta: " + ex.getMessage());
+        }
         dialogPane.getStyleClass().add("alerta-error");
         
         alert.showAndWait();
@@ -570,7 +579,11 @@ public class GestionMantenimientos extends Application {
         
         // Aplicar estilos a la alerta
         DialogPane dialogPane = alert.getDialogPane();
-        dialogPane.getStylesheets().add("data:text/css,".replace("\n", ""));
+        try {
+            dialogPane.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+        } catch (Exception ex) {
+            System.err.println("Error al cargar estilos para alerta: " + ex.getMessage());
+        }
         dialogPane.getStyleClass().add("alerta-info");
         
         alert.showAndWait();
@@ -584,7 +597,11 @@ public class GestionMantenimientos extends Application {
         
         // Aplicar estilos a la alerta
         DialogPane dialogPane = alert.getDialogPane();
-        dialogPane.getStylesheets().add("data:text/css,".replace("\n", ""));
+        try {
+            dialogPane.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+        } catch (Exception ex) {
+            System.err.println("Error al cargar estilos para alerta: " + ex.getMessage());
+        }
         dialogPane.getStyleClass().add("alerta-confirmacion");
         
         return alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK;
