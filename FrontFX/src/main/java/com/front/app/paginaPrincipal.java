@@ -51,8 +51,16 @@ public class paginaPrincipal {
         empresasBtn.setId("boton-grande");
         empresasBtn.setOnAction(e -> {
             GestionEmpresas gestion = new GestionEmpresas();
-            Scene escenaEmpresas = gestion.crearEscena(stage); // Usa el 'stage' ya existente
+            Scene escenaEmpresas = gestion.crearEscena(stage); 
             App.cambiarEscena(escenaEmpresas, "Gestión de Empresas");
+        });
+
+        Button mantenimientoBtn = new Button("Datos sobre Mantenimiento");
+        mantenimientoBtn.setId("boton-grande");
+        mantenimientoBtn.setOnAction(e -> {
+            GestionMantenimientos gestion = new GestionMantenimientos();
+            Scene escenaMantenimiento = gestion.crearEscena(stage); 
+            App.cambiarEscena(escenaMantenimiento, "Gestión de Mantenimentos");
         });
 
         Button volverBtn = new Button("Volver al inicio de sesion");
@@ -71,6 +79,7 @@ public class paginaPrincipal {
         grid.add(viajesBtn, 1, 1);
         grid.add(empleadosBtn, 0, 2);
         grid.add(empresasBtn, 1, 2);
+        grid.add(mantenimientoBtn, 0,3);
 
         VBox layout = new VBox(10,
             titulo,
