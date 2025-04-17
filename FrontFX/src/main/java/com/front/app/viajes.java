@@ -107,15 +107,15 @@ public class viajes {
         });
 
         // Crear el botón para volver a la página principal
-        Button volverPrincipalBtn = new Button("Volver a la página principal");
-        volverPrincipalBtn.setOnAction(e -> {
-            // Redirigir al usuario a la página principal
-            Scene escenaPrincipal = inicio.crearEscena(stage);  // Aquí se debe llamar a la escena principal
-            App.cambiarEscena(escenaPrincipal, "Inicio");
+        Button volverBtn = new Button("Volver al menú principal");
+        volverBtn.setOnAction(e -> {
+            // Aquí puedes cambiar a la escena de la página principal
+            Scene escenaPrincipal = paginaPrincipal.crearEscena(stage);  // Asumiendo que tienes la clase paginaPrincipal
+            App.cambiarEscena(escenaPrincipal, "Página Principal");
         });
 
         // Layout de la vista de listado de viajes
-        VBox layout = new VBox(10, filtroFechaSalida, tablaViajes, volverPrincipalBtn);
+        VBox layout = new VBox(10, filtroFechaSalida, tablaViajes, volverBtn);
         layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.CENTER);
 
