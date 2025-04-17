@@ -292,7 +292,6 @@ public class GestionEmpresas extends Application {
             Button btnAgregar = new Button("Agregar Empresa");
             Button btnEditar = new Button("Editar Empresa");
             Button btnEliminar = new Button("Eliminar Empresa");
-            Button btnActualizar = new Button("Actualizar Datos");
             
             btnAgregar.setOnAction(e -> mostrarModalAgregar());
             
@@ -321,9 +320,8 @@ public class GestionEmpresas extends Application {
                 }
             });
             
-            btnActualizar.setOnAction(e -> cargarDatos());
             
-            botonesAccion.getChildren().addAll(btnAgregar, btnEditar, btnEliminar, btnActualizar);
+            botonesAccion.getChildren().addAll(btnAgregar, btnEditar, btnEliminar);
             
         } catch (Exception ex) {
             registrarExcepcion(ex);

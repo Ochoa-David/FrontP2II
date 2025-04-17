@@ -14,10 +14,17 @@ import javafx.stage.Stage;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class GestionMantenimientos extends Application {
 
+    public static class BaseDatosException extends Exception {
+        public BaseDatosException(String operacion) {
+            super("Error al " + operacion + " datos en la base de datos.");
+        }
+    }
     // Definición de excepciones personalizadas
     public static class MantenimientoException extends Exception {
         public MantenimientoException(String message) {
@@ -43,46 +50,27 @@ public class GestionMantenimientos extends Application {
         }
     }
     
-    public static class BaseDatosException extends MantenimientoException {
-        public BaseDatosException(String operacion) {
-            super("Error al " + operacion + " datos en la base de datos.");
-        }
-    }
-
-    // Modelo de datos para Mantenimiento
     public static class Mantenimiento {
         private Integer id_mantenimiento;
         private String descripcion;
         private LocalDate fecha_mantenimiento;
         private Integer id_bus;
-        private String accion;
+        private String tipo_mantenimiento;
 
-        public Mantenimiento(Integer id_mantenimiento, String descripcion, LocalDate fecha_mantenimiento, 
-                             Integer id_bus, String accion) {
+        public Mantenimiento(Integer id_mantenimiento, String descripcion, LocalDate fecha_mantenimiento, Integer id_bus, String tipo_mantenimiento) {
             this.id_mantenimiento = id_mantenimiento;
             this.descripcion = descripcion;
             this.fecha_mantenimiento = fecha_mantenimiento;
             this.id_bus = id_bus;
-            this.accion = accion;
+            this.tipo_mantenimiento = tipo_mantenimiento;
         }
 
-        // Getters y setters
         public Integer getId_mantenimiento() { return id_mantenimiento; }
-        public void setId_mantenimiento(Integer id_mantenimiento) { this.id_mantenimiento = id_mantenimiento; }
-
         public String getDescripcion() { return descripcion; }
-        public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
-
         public LocalDate getFecha_mantenimiento() { return fecha_mantenimiento; }
-        public void setFecha_mantenimiento(LocalDate fecha_mantenimiento) { this.fecha_mantenimiento = fecha_mantenimiento; }
-
         public Integer getId_bus() { return id_bus; }
-        public void setId_bus(Integer id_bus) { this.id_bus = id_bus; }
+        public String getTipo_mantenimiento() { return tipo_mantenimiento; }
 
-        public String getAccion() { return accion; }
-        public void setAccion(String accion) { this.accion = accion; }
-        
-        // Para mostrar la fecha formateada en la tabla
         public String getFechaFormateada() {
             if (fecha_mantenimiento == null) return "";
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -90,99 +78,72 @@ public class GestionMantenimientos extends Application {
         }
     }
 
-    // Interfaz para gestionar operaciones con la API/Base de datos
     public interface MantenimientoService {
         ObservableList<Mantenimiento> obtenerMantenimientos() throws BaseDatosException;
         ObservableList<Mantenimiento> obtenerMantenimientosPorBus(Integer idBus) throws BaseDatosException;
         Mantenimiento obtenerMantenimientoPorId(Integer idMantenimiento) throws BaseDatosException;
+        String obtenerMarcaBus(Integer idBus);
     }
 
-    // Implementación mock del servicio para pruebas
     public static class MantenimientoServiceMock implements MantenimientoService {
-        private ObservableList<Mantenimiento> mantenimientos;
+        // Inicializar con una lista vacía
+        private ObservableList<Mantenimiento> mantenimientos = FXCollections.observableArrayList();
         
-        public MantenimientoServiceMock() {
-            // Datos de prueba
-            mantenimientos = FXCollections.observableArrayList(
-                new Mantenimiento(1, "Cambio de aceite", LocalDate.now().minusDays(30), 101, "Completado"),
-                new Mantenimiento(2, "Revisión de frenos", LocalDate.now().minusDays(15), 102, "Pendiente"),
-                new Mantenimiento(3, "Cambio de neumáticos", LocalDate.now().minusDays(10), 101, "En proceso"),
-                new Mantenimiento(4, "Inspección general", LocalDate.now().minusDays(5), 103, "Completado"),
-                new Mantenimiento(5, "Reparación de motor", LocalDate.now(), 102, "Programado")
-            );
-        }
-        
+        // Map para simular la relación entre ID de bus y marca
+        private Map<Integer, String> busMarcaMap = new HashMap<Integer, String>() {{
+            put(100, "Mercedes Benz");
+            put(101, "Volvo");
+            put(102, "Scania");
+            put(103, "MAN");
+            put(104, "Iveco");
+        }};
+
         @Override
         public ObservableList<Mantenimiento> obtenerMantenimientos() throws BaseDatosException {
-            // Simular posible error de conexión
-            if (Math.random() < 0.01) { // 1% de probabilidad de error
-                throw new BaseDatosException("obtener");
+            if (!mantenimientos.isEmpty()) {
+                FXCollections.sort(mantenimientos, (m1, m2) -> m2.getFecha_mantenimiento().compareTo(m1.getFecha_mantenimiento()));
             }
-            
-            // Ordenar por fecha (más reciente primero)
-            FXCollections.sort(mantenimientos, (m1, m2) -> 
-                m2.getFecha_mantenimiento().compareTo(m1.getFecha_mantenimiento()));
-                
             return mantenimientos;
         }
-        
+
         @Override
         public ObservableList<Mantenimiento> obtenerMantenimientosPorBus(Integer idBus) throws BaseDatosException {
-            // Simular posible error de conexión
-            if (Math.random() < 0.01) { // 1% de probabilidad de error
-                throw new BaseDatosException("obtener");
-            }
-            
-            // Filtrar por ID de bus y ordenar por fecha
             ObservableList<Mantenimiento> resultado = FXCollections.observableArrayList();
-            
             for (Mantenimiento m : mantenimientos) {
                 if (m.getId_bus().equals(idBus)) {
                     resultado.add(m);
                 }
             }
-            
-            // Ordenar por fecha (más reciente primero)
-            FXCollections.sort(resultado, (m1, m2) -> 
-                m2.getFecha_mantenimiento().compareTo(m1.getFecha_mantenimiento()));
-                
+            if (!resultado.isEmpty()) {
+                FXCollections.sort(resultado, (m1, m2) -> m2.getFecha_mantenimiento().compareTo(m1.getFecha_mantenimiento()));
+            }
             return resultado;
         }
-        
+
         @Override
         public Mantenimiento obtenerMantenimientoPorId(Integer idMantenimiento) throws BaseDatosException {
-            // Simular posible error de conexión
-            if (Math.random() < 0.01) { // 1% de probabilidad de error
-                throw new BaseDatosException("obtener");
-            }
-            
-            // Buscar por ID
             for (Mantenimiento m : mantenimientos) {
                 if (m.getId_mantenimiento().equals(idMantenimiento)) {
                     return m;
                 }
             }
-            
             return null;
+        }
+        
+        @Override
+        public String obtenerMarcaBus(Integer idBus) {
+            return busMarcaMap.getOrDefault(idBus, "Desconocida");
         }
     }
 
-    // Lista observable para almacenar mantenimientos
     private ObservableList<Mantenimiento> listaMantenimientos;
-    
-    // Tabla para mostrar mantenimientos
     private TableView<Mantenimiento> tablaMantenimientos = new TableView<>();
-    
-    // Label para mostrar cuando no hay datos
     private Label lblNoData = new Label("No hay mantenimientos registrados en el sistema");
-    
-    // Servicio para operaciones con mantenimientos
-    private MantenimientoService mantenimientoService;
-    
-    // Elementos para filtrado
+    private MantenimientoService mantenimientoService = new MantenimientoServiceMock();
     private TextField txtFiltroBus;
     private Button btnFiltrar;
     private Button btnLimpiarFiltro;
+    private StackPane contenedorTabla;
 
     @Override
     public void start(Stage primaryStage) {
@@ -202,7 +163,7 @@ public class GestionMantenimientos extends Application {
                 }
             });
             
-            // Cargar datos iniciales
+            // Cargar datos iniciales automáticamente
             cargarDatos();
             
         } catch (Exception ex) {
@@ -232,17 +193,17 @@ public class GestionMantenimientos extends Application {
             // Botones de acción
             HBox botonesAccion = crearBotonesAccion();
     
-            // Botón para volver
             Button volverBtn = new Button("Volver al menú principal");
-            volverBtn.getStyleClass().add("boton-volver");
             volverBtn.setOnAction(e -> {
-                // Aquí iría la lógica para volver al menú principal
-                mostrarInfo("Navegación", "Volviendo al menú principal...");
+                Scene escenaPrincipal = paginaPrincipal.crearEscena(stage); 
+                App.cambiarEscena(escenaPrincipal, "Página Principal");
             });
     
             // Contenedor para la tabla con mensaje de no datos
-            StackPane contenedorTabla = new StackPane(tablaMantenimientos, lblNoData);
-            lblNoData.setVisible(false); // Inicialmente oculto
+            contenedorTabla = new StackPane(tablaMantenimientos, lblNoData);
+            // Inicialmente mostrar mensaje de no datos
+            lblNoData.setVisible(true);
+            tablaMantenimientos.setVisible(false);
     
             // Añadir todos los elementos a la raíz
             root.getChildren().addAll(titulo, filtroBox, contenedorTabla, botonesAccion, volverBtn);
@@ -267,41 +228,40 @@ public class GestionMantenimientos extends Application {
     
     private void configurarTabla() {
         try {
-            // Configurar columnas
-            TableColumn<Mantenimiento, Integer> colId = new TableColumn<>("ID");
+            // Limpiar columnas existentes (por si ya estaban agregadas)
+            tablaMantenimientos.getColumns().clear();
+    
+            // Columna ID de mantenimiento
+            TableColumn<Mantenimiento, Integer> colId = new TableColumn<>("ID Mantenimiento");
             colId.setCellValueFactory(new PropertyValueFactory<>("id_mantenimiento"));
-            colId.setPrefWidth(50);
+            colId.setPrefWidth(120);
             colId.getStyleClass().add("columna-tabla");
             
-            TableColumn<Mantenimiento, String> colDescripcion = new TableColumn<>("Descripción");
-            colDescripcion.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
-            colDescripcion.setPrefWidth(200);
-            colDescripcion.getStyleClass().add("columna-tabla");
-            
+            // Columna Tipo de mantenimiento
+            TableColumn<Mantenimiento, String> colTipo = new TableColumn<>("Tipo");
+            colTipo.setCellValueFactory(new PropertyValueFactory<>("tipo_mantenimiento"));
+            colTipo.setPrefWidth(100);
+            colTipo.getStyleClass().add("columna-tabla");
+    
+            // Columna Fecha
             TableColumn<Mantenimiento, String> colFecha = new TableColumn<>("Fecha");
-            colFecha.setCellValueFactory(new PropertyValueFactory<>("fechaFormateada"));
+            colFecha.setCellValueFactory(new PropertyValueFactory<>("fechaFormateada")); 
             colFecha.setPrefWidth(100);
             colFecha.getStyleClass().add("columna-tabla");
-            
+    
+            // Columna ID del bus
             TableColumn<Mantenimiento, Integer> colBus = new TableColumn<>("ID Bus");
             colBus.setCellValueFactory(new PropertyValueFactory<>("id_bus"));
             colBus.setPrefWidth(80);
             colBus.getStyleClass().add("columna-tabla");
-            
-            TableColumn<Mantenimiento, String> colAccion = new TableColumn<>("Estado");
-            colAccion.setCellValueFactory(new PropertyValueFactory<>("accion"));
-            colAccion.setPrefWidth(100);
-            colAccion.getStyleClass().add("columna-tabla");
-            
-            // Añadir columnas a la tabla
-            tablaMantenimientos.getColumns().addAll(colId, colDescripcion, colFecha, colBus, colAccion);
-            
-            // Permitir que la tabla ocupe todo el ancho disponible
+    
+            // Añadir columnas
+            tablaMantenimientos.getColumns().addAll(colId, colTipo, colFecha, colBus);
+    
             tablaMantenimientos.setPrefHeight(350);
             tablaMantenimientos.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
             tablaMantenimientos.getStyleClass().add("tabla-mantenimientos");
-            
-            // Configurar el doble clic para mostrar detalles
+    
             tablaMantenimientos.setRowFactory(tv -> {
                 TableRow<Mantenimiento> row = new TableRow<>();
                 row.setOnMouseClicked(event -> {
@@ -316,10 +276,12 @@ public class GestionMantenimientos extends Application {
                 });
                 return row;
             });
-            
-            // Estilo para el mensaje de no datos
+    
             lblNoData.getStyleClass().add("no-data-label");
-            
+            // Hacer el texto más grande y centrado
+            lblNoData.setStyle("-fx-font-size: 16px; -fx-text-fill: #555;");
+            StackPane.setAlignment(lblNoData, Pos.CENTER);
+    
         } catch (Exception ex) {
             registrarExcepcion(ex);
             mostrarAlerta("Error de configuración", "Error al configurar la tabla: " + ex.getMessage());
@@ -348,7 +310,7 @@ public class GestionMantenimientos extends Application {
         btnLimpiarFiltro.getStyleClass().add("boton-limpiar");
         btnLimpiarFiltro.setOnAction(e -> {
             txtFiltroBus.clear();
-            cargarDatos();
+            cargarDatos(); // Recarga todos los datos automáticamente
         });
         
         filtroBox.getChildren().addAll(lblFiltro, txtFiltroBus, btnFiltrar, btnLimpiarFiltro);
@@ -358,69 +320,202 @@ public class GestionMantenimientos extends Application {
     
     private HBox crearBotonesAccion() {
         HBox botonesAccion = new HBox(15);
-        
+    
         try {
             botonesAccion.setAlignment(Pos.CENTER);
             botonesAccion.setPadding(new Insets(10, 0, 10, 0));
             botonesAccion.getStyleClass().add("botones-container");
-            
+    
             Button btnVerDetalle = new Button("Ver Detalle");
             btnVerDetalle.getStyleClass().add("boton-ver-detalle");
+    
+            Button btnCrearRegistros = new Button("Crear Registros");
+            btnCrearRegistros.getStyleClass().add("boton-Registros");
+    
+            btnCrearRegistros.setOnAction(e -> {
+                Stage ventanaCrear = new Stage();
+                ventanaCrear.setTitle("Nuevo Registro de Mantenimiento");
+                ventanaCrear.initModality(Modality.APPLICATION_MODAL);
             
-            Button btnActualizar = new Button("Actualizar Datos");
-            btnActualizar.getStyleClass().add("boton-actualizar");
+                // Campos de entrada
+                Label lblMantenimiento = new Label("ID del Mantenimiento:");
+                TextField txtIdMantenimiento = new TextField();
+                txtIdMantenimiento.setPromptText("Ingrese ID de mantenimiento");
             
+                Label lblBus = new Label("ID del Bus:");
+                ComboBox<Integer> comboBus = new ComboBox<>();
+                comboBus.setPromptText("Seleccione ID de bus");
+                
+                Label lblTipo = new Label("Tipo de Mantenimiento:");
+                ComboBox<String> comboTipo = new ComboBox<>();
+                comboTipo.getItems().addAll("Preventivo", "Correctivo", "Rutinario", "Programado");
+                comboTipo.setPromptText("Seleccione tipo de mantenimiento");
+            
+                Label lblFecha = new Label("Fecha:");
+                DatePicker dateFecha = new DatePicker();
+            
+                Label lblDescripcion = new Label("Descripción:");
+                TextArea txtDescripcion = new TextArea();
+                txtDescripcion.setPrefRowCount(3);
+            
+                // Botones
+                Button btnCrear = new Button("Crear");
+                Button btnCancelar = new Button("Cancelar");
+            
+                btnCrear.setOnAction(ev -> {
+                    try {
+                        // Validaciones
+                        if (txtIdMantenimiento.getText().trim().isEmpty()) {
+                            throw new CampoVacioException("ID de mantenimiento");
+                        }
+                        
+                        Integer idMantenimiento;
+                        try {
+                            idMantenimiento = Integer.parseInt(txtIdMantenimiento.getText().trim());
+                        } catch (NumberFormatException ex) {
+                            mostrarAlerta("Error de formato", "El ID del mantenimiento debe ser un número entero");
+                            return;
+                        }
+                        
+                        // Verificar si existe un mantenimiento con el mismo ID
+                        if (listaMantenimientos != null) {
+                            for (Mantenimiento m : listaMantenimientos) {
+                                if (m.getId_mantenimiento().equals(idMantenimiento)) {
+                                    throw new IdDuplicadoException();
+                                }
+                            }
+                        }
+                        
+                        Integer idBus = comboBus.getValue();
+                        String tipo = comboTipo.getValue();
+                        LocalDate fecha = dateFecha.getValue();
+                        String descripcion = txtDescripcion.getText();
+                    
+                        if (idBus == null || tipo == null || fecha == null) {
+                            mostrarAlerta("Campos vacíos", "Todos los campos son obligatorios.");
+                            return;
+                        }
+                    
+                        Mantenimiento nuevo = new Mantenimiento(
+                            idMantenimiento,
+                            descripcion,
+                            fecha,
+                            idBus,
+                            tipo
+                        );
+                        
+                        // Verificar si la lista está inicializada
+                        if (listaMantenimientos == null) {
+                            // Inicializar la lista si es null
+                            try {
+                                listaMantenimientos = mantenimientoService.obtenerMantenimientos();
+                            } catch (BaseDatosException ex) {
+                                listaMantenimientos = FXCollections.observableArrayList();
+                                registrarExcepcion(ex);
+                            }
+                        }
+                        
+                        // Agregar el nuevo mantenimiento
+                        listaMantenimientos.add(nuevo);
+                        
+                        // Asegurarse de que la lista se ordene correctamente
+                        FXCollections.sort(listaMantenimientos, 
+                            (m1, m2) -> m2.getFecha_mantenimiento().compareTo(m1.getFecha_mantenimiento()));
+                        
+                        // Actualizar la vista de la tabla automáticamente
+                        tablaMantenimientos.setItems(listaMantenimientos);
+                        tablaMantenimientos.refresh();
+                        
+                        // Actualizar el estado de "No hay datos"
+                        actualizarEstadoNoData();
+                        
+                        // Mostrar confirmación al usuario
+                        mostrarInfo("Registro creado", "El mantenimiento ha sido registrado correctamente.");
+                        
+                        ventanaCrear.close();
+                    } catch (MantenimientoException ex) {
+                        mostrarAlerta("Error de validación", ex.getMessage());
+                    } catch (Exception ex) {
+                        registrarExcepcion(ex);
+                        mostrarAlerta("Error inesperado", "Error al crear el mantenimiento: " + ex.getMessage());
+                    }
+                });
+            
+                btnCancelar.setOnAction(ev -> ventanaCrear.close());
+            
+                // Layout
+                GridPane grid = new GridPane();
+                grid.setHgap(10);
+                grid.setVgap(10);
+                grid.setPadding(new Insets(15));
+            
+                grid.add(lblMantenimiento, 0, 0);
+                grid.add(txtIdMantenimiento, 1, 0);
+                grid.add(lblBus, 0, 1);
+                grid.add(comboBus, 1, 1);
+                grid.add(lblTipo, 0, 2);
+                grid.add(comboTipo, 1, 2);
+                grid.add(lblFecha, 0, 3);
+                grid.add(dateFecha, 1, 3);
+                grid.add(lblDescripcion, 0, 4);
+                grid.add(txtDescripcion, 1, 4);
+            
+                HBox botones = new HBox(10, btnCrear, btnCancelar);
+                botones.setAlignment(Pos.CENTER_RIGHT);
+                grid.add(botones, 1, 5);
+            
+                // Cargar datos a las listas desplegables
+                comboBus.getItems().addAll(100, 101, 102, 103, 104);
+            
+                Scene scene = new Scene(grid, 500, 350);
+                scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+            
+                ventanaCrear.setScene(scene);
+                ventanaCrear.showAndWait();
+            });
+            
+    
             btnVerDetalle.setOnAction(e -> {
                 try {
                     Mantenimiento mantenimientoSeleccionado = tablaMantenimientos.getSelectionModel().getSelectedItem();
-                    if (mantenimientoSeleccionado == null) {
-                        throw new NoSeleccionException();
-                    }
+                    if (mantenimientoSeleccionado == null) throw new NoSeleccionException();
                     mostrarDetalleMantenimiento(mantenimientoSeleccionado);
                 } catch (MantenimientoException ex) {
                     registrarExcepcion(ex);
                     mostrarAlerta("Error", ex.getMessage());
                 }
             });
-            
-            btnActualizar.setOnAction(e -> cargarDatos());
-            
-            botonesAccion.getChildren().addAll(btnVerDetalle, btnActualizar);
-            
+    
+            botonesAccion.getChildren().addAll(btnVerDetalle, btnCrearRegistros);
+    
         } catch (Exception ex) {
             registrarExcepcion(ex);
             mostrarAlerta("Error de configuración", "Error al crear los botones: " + ex.getMessage());
         }
-        
+    
         return botonesAccion;
     }
     
+    
     private void cargarDatos() {
         try {
-            // Obtener datos desde el servicio
             listaMantenimientos = mantenimientoService.obtenerMantenimientos();
-            
-            // Asignar datos a la tabla
             tablaMantenimientos.setItems(listaMantenimientos);
-            
-            // Verificar si hay datos para mostrar el mensaje correspondiente
             actualizarEstadoNoData();
-            
+            System.out.println("Datos cargados: " + (listaMantenimientos != null ? listaMantenimientos.size() : 0) + " registros");
         } catch (BaseDatosException ex) {
             registrarExcepcion(ex);
-            mostrarAlerta("Error de conexión", "No se pudieron cargar los datos: " + ex.getMessage());
-        } catch (Exception ex) {
-            registrarExcepcion(ex);
-            mostrarAlerta("Error inesperado", "Error al cargar datos: " + ex.getMessage());
+            mostrarAlerta("Error de conexión", ex.getMessage());
         }
     }
+
     
     private void filtrarMantenimientos() {
         try {
             String idBusStr = txtFiltroBus.getText().trim();
             
             if (idBusStr.isEmpty()) {
-                cargarDatos();
+                cargarDatos(); // Carga todos los mantenimientos
                 return;
             }
             
@@ -429,6 +524,8 @@ public class GestionMantenimientos extends Application {
                 listaMantenimientos = mantenimientoService.obtenerMantenimientosPorBus(idBus);
                 tablaMantenimientos.setItems(listaMantenimientos);
                 actualizarEstadoNoData();
+                System.out.println("Datos filtrados para bus ID: " + idBus + " - Resultados: " + 
+                                  (listaMantenimientos != null ? listaMantenimientos.size() : 0));
             } catch (NumberFormatException ex) {
                 mostrarAlerta("Error de formato", "El ID del bus debe ser un número entero");
             }
@@ -444,6 +541,9 @@ public class GestionMantenimientos extends Application {
     
     private void mostrarDetalleMantenimiento(Mantenimiento mantenimiento) {
         try {
+            // Obtener la marca del bus
+            String marcaBus = mantenimientoService.obtenerMarcaBus(mantenimiento.getId_bus());
+            
             // Crear un diálogo modal
             Dialog<Void> dialog = new Dialog<>();
             dialog.setTitle("Detalle de Mantenimiento");
@@ -466,6 +566,11 @@ public class GestionMantenimientos extends Application {
             Label lblId = new Label(mantenimiento.getId_mantenimiento().toString());
             lblId.getStyleClass().add("label-valor");
             
+            Label lblTipoTitulo = new Label("Tipo de Mantenimiento:");
+            lblTipoTitulo.getStyleClass().add("label-titulo");
+            Label lblTipo = new Label(mantenimiento.getTipo_mantenimiento());
+            lblTipo.getStyleClass().add("label-valor");
+            
             Label lblDescripcionTitulo = new Label("Descripción:");
             lblDescripcionTitulo.getStyleClass().add("label-titulo");
             Label lblDescripcion = new Label(mantenimiento.getDescripcion());
@@ -482,44 +587,29 @@ public class GestionMantenimientos extends Application {
             Label lblBus = new Label(mantenimiento.getId_bus().toString());
             lblBus.getStyleClass().add("label-valor");
             
-            Label lblAccionTitulo = new Label("Estado:");
-            lblAccionTitulo.getStyleClass().add("label-titulo");
-            Label lblAccion = new Label(mantenimiento.getAccion());
-            lblAccion.getStyleClass().add("label-valor");
-            
-            // Configurar apariencia según estado
-            switch (mantenimiento.getAccion().toLowerCase()) {
-                case "completado":
-                    lblAccion.getStyleClass().add("estado-completado");
-                    break;
-                case "pendiente":
-                    lblAccion.getStyleClass().add("estado-pendiente");
-                    break;
-                case "en proceso":
-                    lblAccion.getStyleClass().add("estado-en-proceso");
-                    break;
-                case "programado":
-                    lblAccion.getStyleClass().add("estado-programado");
-                    break;
-                default:
-                    break;
-            }
+            Label lblMarcaTitulo = new Label("Marca del Bus:");
+            lblMarcaTitulo.getStyleClass().add("label-titulo");
+            Label lblMarca = new Label(marcaBus);
+            lblMarca.getStyleClass().add("label-valor");
             
             // Añadir elementos al grid
             grid.add(lblIdTitulo, 0, 0);
             grid.add(lblId, 1, 0);
             
-            grid.add(lblBusTitulo, 0, 1);
-            grid.add(lblBus, 1, 1);
+            grid.add(lblTipoTitulo, 0, 1);
+            grid.add(lblTipo, 1, 1);
             
-            grid.add(lblFechaTitulo, 0, 2);
-            grid.add(lblFecha, 1, 2);
+            grid.add(lblBusTitulo, 0, 2);
+            grid.add(lblBus, 1, 2);
             
-            grid.add(lblAccionTitulo, 0, 3);
-            grid.add(lblAccion, 1, 3);
+            grid.add(lblMarcaTitulo, 0, 3);
+            grid.add(lblMarca, 1, 3);
             
-            grid.add(lblDescripcionTitulo, 0, 4);
-            grid.add(lblDescripcion, 1, 4);
+            grid.add(lblFechaTitulo, 0, 4);
+            grid.add(lblFecha, 1, 4);
+            
+            grid.add(lblDescripcionTitulo, 0, 5);
+            grid.add(lblDescripcion, 1, 5);
             
             // Añadir estilos al diálogo
             dialog.getDialogPane().getStyleClass().add("detalle-dialog");
