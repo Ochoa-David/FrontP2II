@@ -61,6 +61,13 @@ public class paginaPrincipal {
             App.cambiarEscena(escenaBoletos, "Listado de Boletos");
         });
 
+        Button detallesBoletosBtn = new Button("Detalles de Boletos Comprados");
+        detallesBoletosBtn.setId("boton-grande");
+        detallesBoletosBtn.setOnAction(e -> {
+            Scene escenaDetalles = detallesBoletos.crearEscena(stage);
+            App.cambiarEscena(escenaDetalles, "Detalles de Boletos Comprados");
+        });
+
         Button volverBtn = new Button("Volver al inicio de sesion");
         volverBtn.setOnAction(e -> {
             Scene escenaLogin = iniciarSesion.crearEscena(stage);
@@ -78,6 +85,7 @@ public class paginaPrincipal {
         grid.add(empleadosBtn, 0, 2);
         grid.add(empresasBtn, 1, 2);
         grid.add(boletosBtn, 0, 3);
+        grid.add(detallesBoletosBtn, 1, 3);
 
         VBox layout = new VBox(10,
             titulo,
