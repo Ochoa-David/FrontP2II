@@ -138,7 +138,6 @@ public class GestionMantenimientos extends Application {
 
     private ObservableList<Mantenimiento> listaMantenimientos;
     private TableView<Mantenimiento> tablaMantenimientos = new TableView<>();
-    private Label lblNoData = new Label("No hay mantenimientos registrados en el sistema");
     private MantenimientoService mantenimientoService = new MantenimientoServiceMock();
     private TextField txtFiltroBus;
     private Button btnFiltrar;
@@ -200,9 +199,8 @@ public class GestionMantenimientos extends Application {
             });
     
             // Contenedor para la tabla con mensaje de no datos
-            contenedorTabla = new StackPane(tablaMantenimientos, lblNoData);
+            contenedorTabla = new StackPane(tablaMantenimientos);
             // Inicialmente mostrar mensaje de no datos
-            lblNoData.setVisible(true);
             tablaMantenimientos.setVisible(true);
     
             // Añadir todos los elementos a la raíz
@@ -281,11 +279,6 @@ public class GestionMantenimientos extends Application {
                 return row;
             });
     
-            lblNoData.getStyleClass().add("no-data-label");
-            // Hacer el texto más grande y centrado
-            lblNoData.setStyle("-fx-font-size: 16px; -fx-text-fill: #555;");
-            StackPane.setAlignment(lblNoData, Pos.CENTER);
-    
         } catch (Exception ex) {
             registrarExcepcion(ex);
             mostrarAlerta("Error de configuración", "Error al configurar la tabla: " + ex.getMessage());
@@ -306,21 +299,44 @@ public class GestionMantenimientos extends Application {
         txtFiltroBus.setPrefWidth(150);
         txtFiltroBus.getStyleClass().add("campo-texto");
         
-        btnFiltrar = new Button("Filtrar");
-        btnFiltrar.getStyleClass().add("boton-filtrar");
-        btnFiltrar.setOnAction(e -> filtrarMantenimientos());
-        
-        btnLimpiarFiltro = new Button("Limpiar filtro");
-        btnLimpiarFiltro.getStyleClass().add("boton-limpiar");
-        btnLimpiarFiltro.setOnAction(e -> {
-            txtFiltroBus.clear();
-            cargarDatos(); // Recarga todos los datos automáticamente
+        // Agregar listener para filtrado dinámico
+        txtFiltroBus.textProperty().addListener((observable, oldValue, newValue) -> {
+            filtrarMantenimientosDinamico(newValue);
         });
         
-        filtroBox.getChildren().addAll(lblFiltro, txtFiltroBus, btnFiltrar, btnLimpiarFiltro);
+        filtroBox.getChildren().addAll(lblFiltro, txtFiltroBus);
         
         return filtroBox;
     }
+
+    private void filtrarMantenimientosDinamico(String texto) {
+    try {
+        if (texto == null || texto.trim().isEmpty()) {
+            // Si el campo está vacío, mostrar todos los mantenimientos
+            cargarDatos();
+            return;
+        }
+        
+        // Intentar filtrar por ID de bus si el texto es un número
+        try {
+            Integer idBus = Integer.parseInt(texto.trim());
+            listaMantenimientos = mantenimientoService.obtenerMantenimientosPorBus(idBus);
+            tablaMantenimientos.setItems(listaMantenimientos);
+            actualizarEstadoNoData();
+            System.out.println("Datos filtrados dinámicamente para bus ID: " + idBus + 
+                              " - Resultados: " + (listaMantenimientos != null ? listaMantenimientos.size() : 0));
+        } catch (NumberFormatException ex) {
+            cargarDatos();
+        }
+        
+    } catch (BaseDatosException ex) {
+        registrarExcepcion(ex);
+        System.err.println("Error al filtrar datos: " + ex.getMessage());
+    } catch (Exception ex) {
+        registrarExcepcion(ex);
+        System.err.println("Error inesperado al filtrar: " + ex.getMessage());
+    }
+}
     
     private HBox crearBotonesAccion() {
         HBox botonesAccion = new HBox(15);
@@ -639,10 +655,8 @@ public class GestionMantenimientos extends Application {
     
     private void actualizarEstadoNoData() {
         if (listaMantenimientos == null || listaMantenimientos.isEmpty()) {
-            lblNoData.setVisible(true);
             tablaMantenimientos.setVisible(true); // ← mantener visible
         } else {
-            lblNoData.setVisible(true);
             tablaMantenimientos.setVisible(true);
         }
     }
