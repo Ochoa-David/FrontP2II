@@ -203,7 +203,7 @@ public class GestionMantenimientos extends Application {
             contenedorTabla = new StackPane(tablaMantenimientos, lblNoData);
             // Inicialmente mostrar mensaje de no datos
             lblNoData.setVisible(true);
-            tablaMantenimientos.setVisible(false);
+            tablaMantenimientos.setVisible(true);
     
             // Añadir todos los elementos a la raíz
             root.getChildren().addAll(titulo, filtroBox, contenedorTabla, botonesAccion, volverBtn);
@@ -257,10 +257,14 @@ public class GestionMantenimientos extends Application {
     
             // Añadir columnas
             tablaMantenimientos.getColumns().addAll(colId, colTipo, colFecha, colBus);
-    
+            
+           
+
             tablaMantenimientos.setPrefHeight(350);
             tablaMantenimientos.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
             tablaMantenimientos.getStyleClass().add("tabla-mantenimientos");
+
+            tablaMantenimientos.setPlaceholder(new Label("No hay mantenimientos registrados"));
     
             tablaMantenimientos.setRowFactory(tv -> {
                 TableRow<Mantenimiento> row = new TableRow<>();
@@ -636,12 +640,13 @@ public class GestionMantenimientos extends Application {
     private void actualizarEstadoNoData() {
         if (listaMantenimientos == null || listaMantenimientos.isEmpty()) {
             lblNoData.setVisible(true);
-            tablaMantenimientos.setVisible(false);
+            tablaMantenimientos.setVisible(true); // ← mantener visible
         } else {
-            lblNoData.setVisible(false);
+            lblNoData.setVisible(true);
             tablaMantenimientos.setVisible(true);
         }
     }
+    
     
     private void mostrarAlerta(String titulo, String mensaje) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
