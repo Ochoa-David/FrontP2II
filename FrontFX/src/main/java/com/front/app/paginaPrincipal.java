@@ -15,8 +15,9 @@ public class paginaPrincipal {
         Button busesBtn = new Button("Datos sobre buses");
         busesBtn.setId("boton-grande");
         busesBtn.setOnAction(e -> {
-            Scene escenaLogin = iniciarSesion.crearEscena(stage);
-            App.cambiarEscena(escenaLogin, "Inicio de Sesión");
+            GestionBuses gestionBuses = new GestionBuses();
+            Scene escenaBuses = gestionBuses.crearEscena(stage);
+            App.cambiarEscena(escenaBuses, "Gestion de buses");
         });
 
         Button paqueteriaBtn = new Button("Datos sobre paqueteria");
@@ -62,6 +63,14 @@ public class paginaPrincipal {
             App.cambiarEscena(escenaLogin, "Inicio de Sesión");
         });
 
+        Button rutasBtn = new Button("Datos sobre rutas");
+        rutasBtn.setId("boton-grande");
+        rutasBtn.setOnAction(e -> {
+            GestionRutas gestionRutas = new GestionRutas();
+            Scene escenaGestionRutas = gestionRutas.crearEscena(stage);
+            App.cambiarEscena(escenaGestionRutas, "Gestion de rutas");
+        });
+
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -72,6 +81,7 @@ public class paginaPrincipal {
         grid.add(viajesBtn, 1, 1);
         grid.add(empleadosBtn, 0, 2);
         grid.add(empresasBtn, 1, 2);
+        grid.add(rutasBtn, 1, 3);
 
         VBox layout = new VBox(10,
             titulo,
