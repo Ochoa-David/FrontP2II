@@ -143,10 +143,10 @@ public class comprarViajes {
             App.cambiarEscena(escenaPago, "Checkout");
         });
 
-        Button volverBtn = new Button("Volver al inicio");
+        Button volverBtn = new Button("Volver");
         volverBtn.setOnAction(e -> {
-            Scene escenaInicio = inicio.crearEscena(stage);
-            App.cambiarEscena(escenaInicio, "Inicio");
+            Scene escenaPaqueteria = paginaPrincipal.crearEscena(stage);
+            App.cambiarEscena(escenaPaqueteria, "Pagina Principal");
         });
 
         VBox layout = new VBox(10,

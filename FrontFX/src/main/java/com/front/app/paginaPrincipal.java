@@ -1,4 +1,5 @@
 package com.front.app;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -22,8 +23,9 @@ public class paginaPrincipal {
         Button paqueteriaBtn = new Button("Datos sobre paqueteria");
         paqueteriaBtn.setId("boton-grande");
         paqueteriaBtn.setOnAction(e -> {
-            Scene escenaLogin = iniciarSesion.crearEscena(stage);
-            App.cambiarEscena(escenaLogin, "Inicio de Sesión");
+            datosSobrePaqueteria datosSobrePaqueteria = new datosSobrePaqueteria();
+            Scene escenaPaqueteria = datosSobrePaqueteria.crearEscena(stage);
+            App.cambiarEscena(escenaPaqueteria, "Gestión de Mantenimentos");
         });
 
         Button sedesBtn = new Button("Datos sobre sedes");
@@ -50,8 +52,32 @@ public class paginaPrincipal {
         Button empresasBtn = new Button("Datos sobre empresas");
         empresasBtn.setId("boton-grande");
         empresasBtn.setOnAction(e -> {
-            Scene escenaLogin = iniciarSesion.crearEscena(stage);
-            App.cambiarEscena(escenaLogin, "Inicio de Sesión");
+           // GestionEmpresas gestion = new GestionEmpresas();
+            //Scene escenaEmpresas = gestion.crearEscena(stage);
+            //App.cambiarEscena(escenaEmpresas, "Gestión de Empresas");
+        });
+
+        Button mantenimientoBtn = new Button("Datos sobre Mantenimiento");
+        mantenimientoBtn.setId("boton-grande");
+        mantenimientoBtn.setOnAction(e -> {
+            //GestionMantenimientos gestion = new GestionMantenimientos();
+            //Scene escenaMantenimiento = gestion.crearEscena(stage);
+            //App.cambiarEscena(escenaMantenimiento, "Gestión de Mantenimentos");
+        });
+
+        Button comprarEnvioBtn = new Button("Comprar Envio");
+        comprarEnvioBtn.setId("boton-grande");
+        comprarEnvioBtn.setOnAction(e -> {
+            Scene escenaComprarEnvio = comprarEnvios.crearEscena(stage);
+            App.cambiarEscena(escenaComprarEnvio, "Comprar Envio");
+        });
+
+        // Aquí agregamos el botón "Comprar Boleto"
+        Button comprarBoletoBtn = new Button("Comprar Boleto");
+        comprarBoletoBtn.setId("boton-grande");
+        comprarBoletoBtn.setOnAction(e -> {
+            Scene escenaComprarBoleto = comprarViajes.crearEscena(stage);
+            App.cambiarEscena(escenaComprarBoleto, "Comprar Boleto");
         });
 
         Button boletosBtn = new Button("Listado de Boletos");
@@ -74,6 +100,7 @@ public class paginaPrincipal {
             App.cambiarEscena(escenaLogin, "Inicio de Sesión");
         });
 
+        // Colocamos los botones en el GridPane
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -84,9 +111,13 @@ public class paginaPrincipal {
         grid.add(viajesBtn, 1, 1);
         grid.add(empleadosBtn, 0, 2);
         grid.add(empresasBtn, 1, 2);
-        grid.add(boletosBtn, 0, 3);
-        grid.add(detallesBoletosBtn, 1, 3);
+        grid.add(mantenimientoBtn, 0, 3);
+        grid.add(comprarEnvioBtn, 1, 3);
+        grid.add(comprarBoletoBtn, 0, 4);
+        grid.add(boletosBtn, 1, 4);
+        grid.add(detallesBoletosBtn, 0, 5);
 
+        // Layout con el título y los botones
         VBox layout = new VBox(10,
             titulo,
             grid,
@@ -95,6 +126,7 @@ public class paginaPrincipal {
         layout.setPadding(new Insets(20));
         layout.setAlignment(Pos.CENTER);
 
+        // Creamos la escena
         Scene scene = new Scene(layout, 600, 500);
         scene.getStylesheets().add(iniciarSesion.class.getResource("/styles.css").toExternalForm());
         return scene;

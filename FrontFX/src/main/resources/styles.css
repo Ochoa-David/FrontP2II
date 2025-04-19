@@ -1,7 +1,4 @@
-.root {
-    -fx-font-family: "Segoe UI";
-    -fx-background-color: #00000f;
-}
+src/main/resources/images/imagen_fondo.png
 
 .label {
     -fx-text-fill: white;
@@ -23,7 +20,7 @@
     -fx-background-radius: 15;
 }
 .button:hover {
-    -fx-background-color: #5e0b9c;
+    -fx-background-color: #4B0082;
 }
 #boton-grande {
     -fx-background-color: #160324;
@@ -31,9 +28,18 @@
     -fx-pref-height: 150px;
 }
 #boton-inicio {
-    -fx-background-color: #160324;
-    -fx-pref-width: 280px;
+    -fx-background-image: url("/images/boton_fondo.png");
+    -fx-background-color: transparent;
+    -fx-background-size: cover;
+    -fx-background-repeat: no-repeat;
+    -fx-background-position: center;
+    -fx-text-fill: white; /* Cambia color del texto si hace falta */
+    -fx-font-style: italic;
+    -fx-font-size: 20px;
+    -fx-pref-width: 200px;
     -fx-pref-height: 350px;
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
 }
 
 .text-field, .password-field {
@@ -121,4 +127,10 @@
 .list-view .list-cell:selected {
     -fx-background-color: #4B0082;
     -fx-text-fill: white;
+}
+
+
+.root {
+    -fx-font-family: "Segoe UI";
+    -fx-background-color: #00000f;
 }

@@ -1,5 +1,5 @@
 package com.front.app;
-import javafx.application.Platform;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -7,18 +7,16 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-//import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.net.URI;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class iniciarSesion {
     public static boolean respuesta(String usuario, String clave) {
-        
         try {
             HttpClient client = HttpClient.newHttpClient();
             ObjectMapper mapper = new ObjectMapper();
@@ -31,10 +29,11 @@ public class iniciarSesion {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             return response.statusCode() == 200 && response.body().contains("token");
         } catch (Exception e) {
-            e.printStackTrace();
-            return true; //Cambiar a true para poder iniciar sesión sin el endpoint y hacer pruebas
+            // Si falla la conexión HTTP, usamos la validación local
+            return usuario.equals("admin") && clave.equals("1234");
         }
     }
+
     public static class LoginData {
         public String usuario;
         public String clave;
@@ -43,6 +42,7 @@ public class iniciarSesion {
             this.clave = clave;
         }
     }
+
     public static Scene crearEscena(Stage stage) {
         Label titulo = new Label("Inicia Sesión");
         titulo.setId("titulo");
@@ -65,19 +65,16 @@ public class iniciarSesion {
                 mensaje.setText("Completa todos los campos.");
                 return;
             }
-            new Thread(() -> {
-                boolean loginExitoso = respuesta(usuario, clave);
-                Platform.runLater(() -> {
-                    if (loginExitoso) {
-                        mensaje.setText("Inicio de sesión exitoso.");
-                        Scene escenaPaginaPrincipal = paginaPrincipal.crearEscena(stage);
-                        stage.setScene(escenaPaginaPrincipal);
-                        stage.setTitle("Página Principal");
-                    } else {
-                        mensaje.setText("Usuario o contraseña incorrectos.");
-                    }
-                });
-            }).start();
+            // Validación simple para el login sin conexión HTTP
+            if (usuario.equals("admin") && clave.equals("1234")) { // Ejemplo de validación básica
+                mensaje.setText("Inicio de sesión exitoso.");
+                // Aquí puedes cargar la escena principal
+                Scene escenaPaginaPrincipal = paginaPrincipal.crearEscena(stage);
+                stage.setScene(escenaPaginaPrincipal);
+                stage.setTitle("Página Principal");
+            } else {
+                mensaje.setText("Usuario o contraseña incorrectos.");
+            }
         });
 
         Button volverBtn = new Button("Volver al inicio");
@@ -87,12 +84,12 @@ public class iniciarSesion {
         });
 
         VBox formulario = new VBox(20,
-                titulo,
-                entradaUsuario,
-                entradaPasswd,
-                iniciarSesionBtn,
-                volverBtn,
-                mensaje
+            titulo,
+            entradaUsuario,
+            entradaPasswd,
+            iniciarSesionBtn,
+            volverBtn,
+            mensaje
         );
         formulario.setPadding(new Insets(20));
         formulario.setAlignment(Pos.CENTER);
