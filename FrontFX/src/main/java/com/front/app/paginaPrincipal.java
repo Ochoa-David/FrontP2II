@@ -52,17 +52,17 @@ public class paginaPrincipal {
         Button empresasBtn = new Button("Datos sobre empresas");
         empresasBtn.setId("boton-grande");
         empresasBtn.setOnAction(e -> {
-           // GestionEmpresas gestion = new GestionEmpresas();
-            //Scene escenaEmpresas = gestion.crearEscena(stage);
-            //App.cambiarEscena(escenaEmpresas, "Gestión de Empresas");
+            GestionEmpresas gestion = new GestionEmpresas();
+            Scene escenaEmpresas = gestion.crearEscena(stage); 
+            App.cambiarEscena(escenaEmpresas, "Gestión de Empresas");
         });
 
         Button mantenimientoBtn = new Button("Datos sobre Mantenimiento");
         mantenimientoBtn.setId("boton-grande");
         mantenimientoBtn.setOnAction(e -> {
-            //GestionMantenimientos gestion = new GestionMantenimientos();
-            //Scene escenaMantenimiento = gestion.crearEscena(stage);
-            //App.cambiarEscena(escenaMantenimiento, "Gestión de Mantenimentos");
+            GestionMantenimientos gestion = new GestionMantenimientos();
+            Scene escenaMantenimiento = gestion.crearEscena(stage); 
+            App.cambiarEscena(escenaMantenimiento, "Gestión de Mantenimentos");
         });
 
         Button comprarEnvioBtn = new Button("Comprar Envio");
@@ -72,7 +72,6 @@ public class paginaPrincipal {
             App.cambiarEscena(escenaComprarEnvio, "Comprar Envio");
         });
 
-        // Aquí agregamos el botón "Comprar Boleto"
         Button comprarBoletoBtn = new Button("Comprar Boleto");
         comprarBoletoBtn.setId("boton-grande");
         comprarBoletoBtn.setOnAction(e -> {
