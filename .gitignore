@@ -1,0 +1,52 @@
+# Archivos de IDE
+.vscode/
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Archivos compilados
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Archivos de log
+*.log
+logs/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# Archivos de configuración local
+*.properties
+*.yml
+*.yaml
+!application.yml
+!application.properties
+
+# Archivos temporales
+*.tmp
+*.bak
+*.swp
+*~
+
+# Archivos de caché
+.cache/
+.npm/
+node_modules/
+
+# Archivos de documentación generados
+docs/
+apidocs/
+site/ 

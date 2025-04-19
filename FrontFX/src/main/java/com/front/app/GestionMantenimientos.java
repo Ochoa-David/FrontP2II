@@ -1,4 +1,4 @@
-package com.front.app;
+ package com.front.app;
 
 import javafx.application.Application;
 import javafx.collections.FXCollections;
