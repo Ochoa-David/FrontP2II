@@ -175,8 +175,8 @@ public class GestionEmpresas extends Application {
 
     public Scene crearEscena(Stage stage) {
         try {
-            empresaService = new EmpresaServiceMock(); // Usa tu servicio real si ya lo tienes implementado
-            cargarDatos(); // Cargar los datos
+            empresaService = new EmpresaServiceMock();
+            cargarDatos();
     
             VBox root = new VBox(20);
             root.setPadding(new Insets(20));
@@ -195,7 +195,7 @@ public class GestionEmpresas extends Application {
             });
     
             StackPane contenedorTabla = new StackPane(tablaEmpresas, lblNoData);
-            lblNoData.setVisible(false); // Inicialmente oculto
+            lblNoData.setVisible(false);
     
             root.getChildren().addAll(titulo, contenedorTabla, botonesAccion, volverBtn);
     
@@ -247,43 +247,43 @@ public class GestionEmpresas extends Application {
     
     private void configurarTabla() {
         try {
-            // Configurar columnas
-            TableColumn<Empresa, Integer> colId = new TableColumn<>("ID");
+            tablaEmpresas.getColumns().clear();
+    
+            TableColumn<Empresa, Integer> colId = new TableColumn<>("ID Empresa");
             colId.setCellValueFactory(new PropertyValueFactory<>("id_empresa"));
-            colId.setPrefWidth(50);
-            
+            colId.setPrefWidth(100);
+    
             TableColumn<Empresa, String> colNombre = new TableColumn<>("Nombre");
             colNombre.setCellValueFactory(new PropertyValueFactory<>("nombre"));
             colNombre.setPrefWidth(150);
-
-            TableColumn<Empresa, Integer> colNit = new TableColumn<>("Nit");
-            colNit.setCellValueFactory(new PropertyValueFactory<>("nit"));
-            colNit.setPrefWidth(150);
-            
+    
+            TableColumn<Empresa, Integer> colNit = new TableColumn<>("NIT");
+            colNit.setCellValueFactory(new PropertyValueFactory<>("Nit"));
+            colNit.setPrefWidth(100);
+    
             TableColumn<Empresa, String> colTelefono = new TableColumn<>("Teléfono");
             colTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
-            colTelefono.setPrefWidth(100);
-            
-            TableColumn<Empresa, String> colIdseguro = new TableColumn<>("Idseguro");
-            colIdseguro.setCellValueFactory(new PropertyValueFactory<>("idseguro"));
-            colIdseguro.setPrefWidth(100);
-            
+            colTelefono.setPrefWidth(120);
+    
+            TableColumn<Empresa, Integer> colSeguro = new TableColumn<>("ID Seguro");
+            colSeguro.setCellValueFactory(new PropertyValueFactory<>("Idseguro"));
+            colSeguro.setPrefWidth(100);
+    
             TableColumn<Empresa, String> colDireccion = new TableColumn<>("Dirección");
             colDireccion.setCellValueFactory(new PropertyValueFactory<>("direccion"));
             colDireccion.setPrefWidth(150);
-            
-            TableColumn<Empresa, Integer> colTipoEmpresa = new TableColumn<>("Tipo");
-            colTipoEmpresa.setCellValueFactory(new PropertyValueFactory<>("id_tipo_empresa"));
-            colTipoEmpresa.setPrefWidth(50);
-            
-            // Añadir columnas a la tabla
-            tablaEmpresas.getColumns().addAll(colId, colNombre, colNit, colTelefono, colIdseguro, colDireccion, colTipoEmpresa);
+    
+            TableColumn<Empresa, Integer> colTipo = new TableColumn<>("Tipo Empresa");
+            colTipo.setCellValueFactory(new PropertyValueFactory<>("id_tipo_empresa"));
+            colTipo.setPrefWidth(100);
+    
+            tablaEmpresas.getColumns().addAll(colId, colNombre, colNit, colTelefono, colSeguro, colDireccion, colTipo);
+            tablaEmpresas.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
             
             tablaEmpresas.setPlaceholder(new Label("No hay empresas registradas"));
 
             // Permitir que la tabla ocupe todo el ancho disponible
             tablaEmpresas.setPrefHeight(350);
-            tablaEmpresas.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
             
             // Estilo para el mensaje de no datos
             lblNoData.setStyle("-fx-font-size: 16px; -fx-text-fill: #757575;");
@@ -295,52 +295,43 @@ public class GestionEmpresas extends Application {
     }
     
     private HBox crearBotonesAccion() {
-        HBox botonesAccion = new HBox(10);
-        
-        try {
-            botonesAccion.setAlignment(Pos.CENTER);
-            
-            Button btnAgregar = new Button("Agregar Empresa");
-            Button btnDetaller = new Button("Detaller Empresa");
-            Button btnEliminar = new Button("Eliminar Empresa");
-            
-            btnAgregar.setOnAction(e -> mostrarModalAgregar());
-            
-            btnDetaller.setOnAction(e -> {
-                try {
-                    Empresa empresaSeleccionada = tablaEmpresas.getSelectionModel().getSelectedItem();
-                    if (empresaSeleccionada == null) {
-                        throw new NoSeleccionException();
-                    }
-                    mostrarModalDetalle(empresaSeleccionada);
-                } catch (EmpresaException ex) {
-                    registrarExcepcion(ex);
-                    mostrarAlerta("Error", ex.getMessage());
-                }
-            });
-            
-            
-            btnEliminar.setOnAction(e -> {
-                try {
-                    eliminarEmpresa();
-                } catch (EmpresaException ex) {
-                    registrarExcepcion(ex);
-                    mostrarAlerta("Error al eliminar", ex.getMessage());
-                } catch (Exception ex) {
-                    registrarExcepcion(ex);
-                    mostrarAlerta("Error inesperado", "Error al eliminar empresa: " + ex.getMessage());
-                }
-            });
-            
-            
-            botonesAccion.getChildren().addAll(btnAgregar, btnDetaller, btnEliminar);
-            
-        } catch (Exception ex) {
-            registrarExcepcion(ex);
-            mostrarAlerta("Error de configuración", "Error al crear los botones: " + ex.getMessage());
-        }
-        
-        return botonesAccion;
+        HBox botonesBox = new HBox(10);
+        botonesBox.setAlignment(Pos.CENTER);
+    
+        Button btnAgregar = new Button("Agregar Empresa");
+        btnAgregar.setOnAction(e -> mostrarModalAgregar());
+    
+        Button btnEditar = new Button("Editar Empresa");
+        btnEditar.setOnAction(e -> {
+            Empresa seleccionada = tablaEmpresas.getSelectionModel().getSelectedItem();
+            if (seleccionada != null) {
+                mostrarModalEditar(seleccionada);
+            } else {
+                mostrarAlerta("Error", "Por favor seleccione una empresa para editar");
+            }
+        });
+    
+        Button btnEliminar = new Button("Eliminar Empresa");
+        btnEliminar.setOnAction(e -> {
+            try {
+                eliminarEmpresa();
+            } catch (EmpresaException ex) {
+                mostrarAlerta("Error", ex.getMessage());
+            }
+        });
+    
+        Button btnDetalles = new Button("Ver Detalles");
+        btnDetalles.setOnAction(e -> {
+            Empresa seleccionada = tablaEmpresas.getSelectionModel().getSelectedItem();
+            if (seleccionada != null) {
+                mostrarModalDetalle(seleccionada);
+            } else {
+                mostrarAlerta("Error", "Por favor seleccione una empresa para ver sus detalles");
+            }
+        });
+    
+        botonesBox.getChildren().addAll(btnAgregar, btnEditar, btnEliminar, btnDetalles);
+        return botonesBox;
     }
     private void mostrarModalDetalle(Empresa empresa) {
         Dialog<Void> dialog = new Dialog<>();

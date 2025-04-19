@@ -173,23 +173,16 @@ public class GestionMantenimientos extends Application {
     
     public Scene crearEscena(Stage stage) {
         try {
-            // Crear la raíz de la interfaz
             VBox root = new VBox(20);
             root.setPadding(new Insets(20));
             root.setAlignment(Pos.CENTER);
             root.getStyleClass().add("root-container");
     
-            // Título de la sección
             Label titulo = new Label("Gestión de Mantenimientos");
             titulo.getStyleClass().add("titulo-principal");
     
-            // Crear filtro por ID de bus
             HBox filtroBox = crearFiltro();
-            
-            // Configurar tabla
             configurarTabla();
-            
-            // Botones de acción
             HBox botonesAccion = crearBotonesAccion();
     
             Button volverBtn = new Button("Volver al menú principal");
@@ -198,15 +191,11 @@ public class GestionMantenimientos extends Application {
                 App.cambiarEscena(escenaPrincipal, "Página Principal");
             });
     
-            // Contenedor para la tabla con mensaje de no datos
             contenedorTabla = new StackPane(tablaMantenimientos);
-            // Inicialmente mostrar mensaje de no datos
             tablaMantenimientos.setVisible(true);
     
-            // Añadir todos los elementos a la raíz
             root.getChildren().addAll(titulo, filtroBox, contenedorTabla, botonesAccion, volverBtn);
     
-            // Crear la escena
             Scene scene = new Scene(root, 800, 600);
     
             try {
@@ -226,58 +215,35 @@ public class GestionMantenimientos extends Application {
     
     private void configurarTabla() {
         try {
-            // Limpiar columnas existentes (por si ya estaban agregadas)
             tablaMantenimientos.getColumns().clear();
     
-            // Columna ID de mantenimiento
             TableColumn<Mantenimiento, Integer> colId = new TableColumn<>("ID Mantenimiento");
             colId.setCellValueFactory(new PropertyValueFactory<>("id_mantenimiento"));
             colId.setPrefWidth(120);
             colId.getStyleClass().add("columna-tabla");
             
-            // Columna Tipo de mantenimiento
             TableColumn<Mantenimiento, String> colTipo = new TableColumn<>("Tipo");
             colTipo.setCellValueFactory(new PropertyValueFactory<>("tipo_mantenimiento"));
             colTipo.setPrefWidth(100);
             colTipo.getStyleClass().add("columna-tabla");
     
-            // Columna Fecha
             TableColumn<Mantenimiento, String> colFecha = new TableColumn<>("Fecha");
             colFecha.setCellValueFactory(new PropertyValueFactory<>("fechaFormateada")); 
             colFecha.setPrefWidth(100);
             colFecha.getStyleClass().add("columna-tabla");
     
-            // Columna ID del bus
             TableColumn<Mantenimiento, Integer> colBus = new TableColumn<>("ID Bus");
             colBus.setCellValueFactory(new PropertyValueFactory<>("id_bus"));
             colBus.setPrefWidth(80);
             colBus.getStyleClass().add("columna-tabla");
     
-            // Añadir columnas
-            tablaMantenimientos.getColumns().addAll(colId, colTipo, colFecha, colBus);
-            
-           
-
-            tablaMantenimientos.setPrefHeight(350);
-            tablaMantenimientos.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
-            tablaMantenimientos.getStyleClass().add("tabla-mantenimientos");
-
-            tablaMantenimientos.setPlaceholder(new Label("No hay mantenimientos registrados"));
+            TableColumn<Mantenimiento, String> colDescripcion = new TableColumn<>("Descripción");
+            colDescripcion.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
+            colDescripcion.setPrefWidth(200);
+            colDescripcion.getStyleClass().add("columna-tabla");
     
-            tablaMantenimientos.setRowFactory(tv -> {
-                TableRow<Mantenimiento> row = new TableRow<>();
-                row.setOnMouseClicked(event -> {
-                    if (event.getClickCount() == 2 && (!row.isEmpty())) {
-                        try {
-                            mostrarDetalleMantenimiento(row.getItem());
-                        } catch (Exception e) {
-                            registrarExcepcion(e);
-                            mostrarAlerta("Error", "No se pudo mostrar el detalle: " + e.getMessage());
-                        }
-                    }
-                });
-                return row;
-            });
+            tablaMantenimientos.getColumns().addAll(colId, colTipo, colFecha, colBus, colDescripcion);
+            tablaMantenimientos.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     
         } catch (Exception ex) {
             registrarExcepcion(ex);
@@ -288,248 +254,25 @@ public class GestionMantenimientos extends Application {
     private HBox crearFiltro() {
         HBox filtroBox = new HBox(10);
         filtroBox.setAlignment(Pos.CENTER);
-        filtroBox.setPadding(new Insets(0, 0, 10, 0));
-        filtroBox.getStyleClass().add("filtro-container");
-        
-        Label lblFiltro = new Label("Filtrar por ID Bus:");
-        lblFiltro.getStyleClass().add("label-filtro");
-        
+    
+        Label lblFiltro = new Label("Filtrar por ID de Bus:");
         txtFiltroBus = new TextField();
         txtFiltroBus.setPromptText("Ingrese ID del bus");
         txtFiltroBus.setPrefWidth(150);
-        txtFiltroBus.getStyleClass().add("campo-texto");
-        
-        // Agregar listener para filtrado dinámico
-        txtFiltroBus.textProperty().addListener((observable, oldValue, newValue) -> {
-            filtrarMantenimientosDinamico(newValue);
+    
+        btnFiltrar = new Button("Filtrar");
+        btnFiltrar.setOnAction(e -> filtrarMantenimientos());
+    
+        btnLimpiarFiltro = new Button("Limpiar");
+        btnLimpiarFiltro.setOnAction(e -> {
+            txtFiltroBus.clear();
+            cargarDatos();
         });
-        
-        filtroBox.getChildren().addAll(lblFiltro, txtFiltroBus);
-        
+    
+        filtroBox.getChildren().addAll(lblFiltro, txtFiltroBus, btnFiltrar, btnLimpiarFiltro);
         return filtroBox;
     }
 
-    private void filtrarMantenimientosDinamico(String texto) {
-    try {
-        if (texto == null || texto.trim().isEmpty()) {
-            // Si el campo está vacío, mostrar todos los mantenimientos
-            cargarDatos();
-            return;
-        }
-        
-        // Intentar filtrar por ID de bus si el texto es un número
-        try {
-            Integer idBus = Integer.parseInt(texto.trim());
-            listaMantenimientos = mantenimientoService.obtenerMantenimientosPorBus(idBus);
-            tablaMantenimientos.setItems(listaMantenimientos);
-            actualizarEstadoNoData();
-            System.out.println("Datos filtrados dinámicamente para bus ID: " + idBus + 
-                              " - Resultados: " + (listaMantenimientos != null ? listaMantenimientos.size() : 0));
-        } catch (NumberFormatException ex) {
-            cargarDatos();
-        }
-        
-    } catch (BaseDatosException ex) {
-        registrarExcepcion(ex);
-        System.err.println("Error al filtrar datos: " + ex.getMessage());
-    } catch (Exception ex) {
-        registrarExcepcion(ex);
-        System.err.println("Error inesperado al filtrar: " + ex.getMessage());
-    }
-}
-    
-    private HBox crearBotonesAccion() {
-        HBox botonesAccion = new HBox(15);
-    
-        try {
-            botonesAccion.setAlignment(Pos.CENTER);
-            botonesAccion.setPadding(new Insets(10, 0, 10, 0));
-            botonesAccion.getStyleClass().add("botones-container");
-    
-            Button btnVerDetalle = new Button("Ver Detalle");
-            btnVerDetalle.getStyleClass().add("boton-ver-detalle");
-    
-            Button btnCrearRegistros = new Button("Crear Registros");
-            btnCrearRegistros.getStyleClass().add("boton-Registros");
-    
-            btnCrearRegistros.setOnAction(e -> {
-                Stage ventanaCrear = new Stage();
-                ventanaCrear.setTitle("Nuevo Registro de Mantenimiento");
-                ventanaCrear.initModality(Modality.APPLICATION_MODAL);
-            
-                // Campos de entrada
-                Label lblMantenimiento = new Label("ID del Mantenimiento:");
-                TextField txtIdMantenimiento = new TextField();
-                txtIdMantenimiento.setPromptText("Ingrese ID de mantenimiento");
-            
-                Label lblBus = new Label("ID del Bus:");
-                ComboBox<Integer> comboBus = new ComboBox<>();
-                comboBus.setPromptText("Seleccione ID de bus");
-                
-                Label lblTipo = new Label("Tipo de Mantenimiento:");
-                ComboBox<String> comboTipo = new ComboBox<>();
-                comboTipo.getItems().addAll("Preventivo", "Correctivo", "Rutinario", "Programado");
-                comboTipo.setPromptText("Seleccione tipo de mantenimiento");
-            
-                Label lblFecha = new Label("Fecha:");
-                DatePicker dateFecha = new DatePicker();
-            
-                Label lblDescripcion = new Label("Descripción:");
-                TextArea txtDescripcion = new TextArea();
-                txtDescripcion.setPrefRowCount(3);
-            
-                // Botones
-                Button btnCrear = new Button("Crear");
-                Button btnCancelar = new Button("Cancelar");
-            
-                btnCrear.setOnAction(ev -> {
-                    try {
-                        // Validaciones
-                        if (txtIdMantenimiento.getText().trim().isEmpty()) {
-                            throw new CampoVacioException("ID de mantenimiento");
-                        }
-                        
-                        Integer idMantenimiento;
-                        try {
-                            idMantenimiento = Integer.parseInt(txtIdMantenimiento.getText().trim());
-                        } catch (NumberFormatException ex) {
-                            mostrarAlerta("Error de formato", "El ID del mantenimiento debe ser un número entero");
-                            return;
-                        }
-                        
-                        // Verificar si existe un mantenimiento con el mismo ID
-                        if (listaMantenimientos != null) {
-                            for (Mantenimiento m : listaMantenimientos) {
-                                if (m.getId_mantenimiento().equals(idMantenimiento)) {
-                                    throw new IdDuplicadoException();
-                                }
-                            }
-                        }
-                        
-                        Integer idBus = comboBus.getValue();
-                        String tipo = comboTipo.getValue();
-                        LocalDate fecha = dateFecha.getValue();
-                        String descripcion = txtDescripcion.getText();
-                    
-                        if (idBus == null || tipo == null || fecha == null) {
-                            mostrarAlerta("Campos vacíos", "Todos los campos son obligatorios.");
-                            return;
-                        }
-                    
-                        Mantenimiento nuevo = new Mantenimiento(
-                            idMantenimiento,
-                            descripcion,
-                            fecha,
-                            idBus,
-                            tipo
-                        );
-                        
-                        // Verificar si la lista está inicializada
-                        if (listaMantenimientos == null) {
-                            // Inicializar la lista si es null
-                            try {
-                                listaMantenimientos = mantenimientoService.obtenerMantenimientos();
-                            } catch (BaseDatosException ex) {
-                                listaMantenimientos = FXCollections.observableArrayList();
-                                registrarExcepcion(ex);
-                            }
-                        }
-                        
-                        // Agregar el nuevo mantenimiento
-                        listaMantenimientos.add(nuevo);
-                        
-                        // Asegurarse de que la lista se ordene correctamente
-                        FXCollections.sort(listaMantenimientos, 
-                            (m1, m2) -> m2.getFecha_mantenimiento().compareTo(m1.getFecha_mantenimiento()));
-                        
-                        // Actualizar la vista de la tabla automáticamente
-                        tablaMantenimientos.setItems(listaMantenimientos);
-                        tablaMantenimientos.refresh();
-                        
-                        // Actualizar el estado de "No hay datos"
-                        actualizarEstadoNoData();
-                        
-                        // Mostrar confirmación al usuario
-                        mostrarInfo("Registro creado", "El mantenimiento ha sido registrado correctamente.");
-                        
-                        ventanaCrear.close();
-                    } catch (MantenimientoException ex) {
-                        mostrarAlerta("Error de validación", ex.getMessage());
-                    } catch (Exception ex) {
-                        registrarExcepcion(ex);
-                        mostrarAlerta("Error inesperado", "Error al crear el mantenimiento: " + ex.getMessage());
-                    }
-                });
-            
-                btnCancelar.setOnAction(ev -> ventanaCrear.close());
-            
-                // Layout
-                GridPane grid = new GridPane();
-                grid.setHgap(10);
-                grid.setVgap(10);
-                grid.setPadding(new Insets(15));
-            
-                grid.add(lblMantenimiento, 0, 0);
-                grid.add(txtIdMantenimiento, 1, 0);
-                grid.add(lblBus, 0, 1);
-                grid.add(comboBus, 1, 1);
-                grid.add(lblTipo, 0, 2);
-                grid.add(comboTipo, 1, 2);
-                grid.add(lblFecha, 0, 3);
-                grid.add(dateFecha, 1, 3);
-                grid.add(lblDescripcion, 0, 4);
-                grid.add(txtDescripcion, 1, 4);
-            
-                HBox botones = new HBox(10, btnCrear, btnCancelar);
-                botones.setAlignment(Pos.CENTER_RIGHT);
-                grid.add(botones, 1, 5);
-            
-                // Cargar datos a las listas desplegables
-                comboBus.getItems().addAll(100, 101, 102, 103, 104);
-            
-                Scene scene = new Scene(grid, 500, 350);
-                scene.getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
-            
-                ventanaCrear.setScene(scene);
-                ventanaCrear.showAndWait();
-            });
-            
-    
-            btnVerDetalle.setOnAction(e -> {
-                try {
-                    Mantenimiento mantenimientoSeleccionado = tablaMantenimientos.getSelectionModel().getSelectedItem();
-                    if (mantenimientoSeleccionado == null) throw new NoSeleccionException();
-                    mostrarDetalleMantenimiento(mantenimientoSeleccionado);
-                } catch (MantenimientoException ex) {
-                    registrarExcepcion(ex);
-                    mostrarAlerta("Error", ex.getMessage());
-                }
-            });
-    
-            botonesAccion.getChildren().addAll(btnVerDetalle, btnCrearRegistros);
-    
-        } catch (Exception ex) {
-            registrarExcepcion(ex);
-            mostrarAlerta("Error de configuración", "Error al crear los botones: " + ex.getMessage());
-        }
-    
-        return botonesAccion;
-    }
-    
-    
-    private void cargarDatos() {
-        try {
-            listaMantenimientos = mantenimientoService.obtenerMantenimientos();
-            tablaMantenimientos.setItems(listaMantenimientos);
-            actualizarEstadoNoData();
-            System.out.println("Datos cargados: " + (listaMantenimientos != null ? listaMantenimientos.size() : 0) + " registros");
-        } catch (BaseDatosException ex) {
-            registrarExcepcion(ex);
-            mostrarAlerta("Error de conexión", ex.getMessage());
-        }
-    }
-
-    
     private void filtrarMantenimientos() {
         try {
             String idBusStr = txtFiltroBus.getText().trim();
@@ -559,6 +302,59 @@ public class GestionMantenimientos extends Application {
         }
     }
     
+    private HBox crearBotonesAccion() {
+        HBox botonesBox = new HBox(10);
+        botonesBox.setAlignment(Pos.CENTER);
+    
+        Button btnAgregar = new Button("Agregar Mantenimiento");
+        btnAgregar.setOnAction(e -> mostrarModalAgregar());
+    
+        Button btnEditar = new Button("Editar Mantenimiento");
+        btnEditar.setOnAction(e -> {
+            Mantenimiento seleccionado = tablaMantenimientos.getSelectionModel().getSelectedItem();
+            if (seleccionado != null) {
+                mostrarModalEditar(seleccionado);
+            } else {
+                mostrarAlerta("Error", "Por favor seleccione un mantenimiento para editar");
+            }
+        });
+    
+        Button btnEliminar = new Button("Eliminar Mantenimiento");
+        btnEliminar.setOnAction(e -> {
+            try {
+                eliminarMantenimiento();
+            } catch (MantenimientoException ex) {
+                mostrarAlerta("Error", ex.getMessage());
+            }
+        });
+    
+        Button btnDetalles = new Button("Ver Detalles");
+        btnDetalles.setOnAction(e -> {
+            Mantenimiento seleccionado = tablaMantenimientos.getSelectionModel().getSelectedItem();
+            if (seleccionado != null) {
+                mostrarDetalleMantenimiento(seleccionado);
+            } else {
+                mostrarAlerta("Error", "Por favor seleccione un mantenimiento para ver sus detalles");
+            }
+        });
+    
+        botonesBox.getChildren().addAll(btnAgregar, btnEditar, btnEliminar, btnDetalles);
+        return botonesBox;
+    }
+    
+    
+    private void cargarDatos() {
+        try {
+            listaMantenimientos = mantenimientoService.obtenerMantenimientos();
+            tablaMantenimientos.setItems(listaMantenimientos);
+            actualizarEstadoNoData();
+            System.out.println("Datos cargados: " + (listaMantenimientos != null ? listaMantenimientos.size() : 0) + " registros");
+        } catch (BaseDatosException ex) {
+            registrarExcepcion(ex);
+            mostrarAlerta("Error de conexión", ex.getMessage());
+        }
+    }
+
     private void mostrarDetalleMantenimiento(Mantenimiento mantenimiento) {
         try {
             // Obtener la marca del bus
@@ -720,6 +516,276 @@ public class GestionMantenimientos extends Application {
         // Solo registrar en consola
         System.err.println("Excepción capturada: " + ex.getMessage());
         ex.printStackTrace();
+    }
+
+    private void mostrarModalAgregar() {
+        try {
+            Dialog<Mantenimiento> dialog = new Dialog<>();
+            dialog.setTitle("Agregar Mantenimiento");
+            dialog.setHeaderText("Ingrese los datos del nuevo mantenimiento");
+
+            ButtonType btnGuardar = new ButtonType("Guardar", ButtonBar.ButtonData.OK_DONE);
+            ButtonType btnCancelar = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
+            dialog.getDialogPane().getButtonTypes().addAll(btnGuardar, btnCancelar);
+
+            // Crear campos de formulario
+            TextField txtId = new TextField();
+            TextField txtDescripcion = new TextField();
+            DatePicker dateFecha = new DatePicker();
+            ComboBox<Integer> comboBus = new ComboBox<>();
+            ComboBox<String> comboTipo = new ComboBox<>();
+
+            // Configurar ComboBox
+            comboBus.setPromptText("Seleccione ID de bus");
+            comboBus.getItems().addAll(100, 101, 102, 103, 104);
+            
+            comboTipo.setPromptText("Seleccione tipo de mantenimiento");
+            comboTipo.getItems().addAll("Preventivo", "Correctivo", "Rutinario", "Programado");
+
+            try {
+                dialog.getDialogPane().getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+            } catch (Exception ex) {
+                registrarExcepcion(ex);
+            }
+
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.setPadding(new Insets(20, 150, 10, 10));
+
+            grid.add(new Label("ID:"), 0, 0);
+            grid.add(txtId, 1, 0);
+            txtId.setPromptText("ID mantenimiento (solo números)");
+
+            grid.add(new Label("Descripción:"), 0, 1);
+            grid.add(txtDescripcion, 1, 1);
+
+            grid.add(new Label("Fecha:"), 0, 2);
+            grid.add(dateFecha, 1, 2);
+
+            grid.add(new Label("ID Bus:"), 0, 3);
+            grid.add(comboBus, 1, 3);
+
+            grid.add(new Label("Tipo:"), 0, 4);
+            grid.add(comboTipo, 1, 4);
+
+            dialog.getDialogPane().setContent(grid);
+
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == btnGuardar) {
+                    try {
+                        // Validar campos
+                        if (txtId.getText().trim().isEmpty()) {
+                            throw new CampoVacioException("ID");
+                        }
+                        if (txtDescripcion.getText().trim().isEmpty()) {
+                            throw new CampoVacioException("Descripción");
+                        }
+                        if (dateFecha.getValue() == null) {
+                            throw new CampoVacioException("Fecha");
+                        }
+                        if (comboBus.getValue() == null) {
+                            throw new CampoVacioException("ID Bus");
+                        }
+                        if (comboTipo.getValue() == null) {
+                            throw new CampoVacioException("Tipo");
+                        }
+
+                        Integer id = Integer.parseInt(txtId.getText().trim());
+                        String descripcion = txtDescripcion.getText().trim();
+                        LocalDate fecha = dateFecha.getValue();
+                        Integer idBus = comboBus.getValue();
+                        String tipo = comboTipo.getValue();
+
+                        // Verificar si existe un mantenimiento con el mismo ID
+                        if (listaMantenimientos != null) {
+                            for (Mantenimiento m : listaMantenimientos) {
+                                if (m.getId_mantenimiento().equals(id)) {
+                                    throw new IdDuplicadoException();
+                                }
+                            }
+                        }
+
+                        return new Mantenimiento(id, descripcion, fecha, idBus, tipo);
+                    } catch (MantenimientoException | NumberFormatException ex) {
+                        registrarExcepcion(ex);
+                        mostrarAlerta("Error de validación", ex instanceof MantenimientoException ?
+                                ex.getMessage() : "El ID debe ser un número entero.");
+                        return null;
+                    }
+                }
+                return null;
+            });
+
+            Optional<Mantenimiento> resultado = dialog.showAndWait();
+
+            resultado.ifPresent(mantenimiento -> {
+                try {
+                    // Agregar a la lista local
+                    if (listaMantenimientos == null) {
+                        listaMantenimientos = FXCollections.observableArrayList();
+                    }
+                    listaMantenimientos.add(mantenimiento);
+                    
+                    // Actualizar la tabla
+                    tablaMantenimientos.setItems(listaMantenimientos);
+                    actualizarEstadoNoData();
+                    
+                    mostrarInfo("Éxito", "Mantenimiento agregado correctamente.");
+                } catch (Exception ex) {
+                    registrarExcepcion(ex);
+                    mostrarAlerta("Error", "Error al agregar el mantenimiento: " + ex.getMessage());
+                }
+            });
+
+        } catch (Exception ex) {
+            registrarExcepcion(ex);
+            mostrarAlerta("Error", "Error al mostrar el formulario: " + ex.getMessage());
+        }
+    }
+
+    private void mostrarModalEditar(Mantenimiento mantenimiento) {
+        try {
+            Dialog<Mantenimiento> dialog = new Dialog<>();
+            dialog.setTitle("Editar Mantenimiento");
+            dialog.setHeaderText("Modifique los datos del mantenimiento");
+
+            ButtonType btnGuardar = new ButtonType("Actualizar", ButtonBar.ButtonData.OK_DONE);
+            ButtonType btnCancelar = new ButtonType("Cancelar", ButtonBar.ButtonData.CANCEL_CLOSE);
+            dialog.getDialogPane().getButtonTypes().addAll(btnGuardar, btnCancelar);
+
+            // Crear campos de formulario y poblarlos con datos existentes
+            TextField txtId = new TextField(mantenimiento.getId_mantenimiento().toString());
+            TextField txtDescripcion = new TextField(mantenimiento.getDescripcion());
+            DatePicker dateFecha = new DatePicker(mantenimiento.getFecha_mantenimiento());
+            ComboBox<Integer> comboBus = new ComboBox<>();
+            ComboBox<String> comboTipo = new ComboBox<>();
+
+            // Configurar ComboBox
+            comboBus.setPromptText("Seleccione ID de bus");
+            comboBus.getItems().addAll(100, 101, 102, 103, 104);
+            comboBus.setValue(mantenimiento.getId_bus());
+            
+            comboTipo.setPromptText("Seleccione tipo de mantenimiento");
+            comboTipo.getItems().addAll("Preventivo", "Correctivo", "Rutinario", "Programado");
+            comboTipo.setValue(mantenimiento.getTipo_mantenimiento());
+
+            try {
+                dialog.getDialogPane().getStylesheets().add(getClass().getResource("/styles.css").toExternalForm());
+            } catch (Exception ex) {
+                registrarExcepcion(ex);
+            }
+
+            // Deshabilitar edición del ID
+            txtId.setDisable(true);
+
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+            grid.setPadding(new Insets(20, 150, 10, 10));
+
+            grid.add(new Label("ID:"), 0, 0);
+            grid.add(txtId, 1, 0);
+
+            grid.add(new Label("Descripción:"), 0, 1);
+            grid.add(txtDescripcion, 1, 1);
+
+            grid.add(new Label("Fecha:"), 0, 2);
+            grid.add(dateFecha, 1, 2);
+
+            grid.add(new Label("ID Bus:"), 0, 3);
+            grid.add(comboBus, 1, 3);
+
+            grid.add(new Label("Tipo:"), 0, 4);
+            grid.add(comboTipo, 1, 4);
+
+            dialog.getDialogPane().setContent(grid);
+
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == btnGuardar) {
+                    try {
+                        // Validar campos
+                        if (txtDescripcion.getText().trim().isEmpty()) {
+                            throw new CampoVacioException("Descripción");
+                        }
+                        if (dateFecha.getValue() == null) {
+                            throw new CampoVacioException("Fecha");
+                        }
+                        if (comboBus.getValue() == null) {
+                            throw new CampoVacioException("ID Bus");
+                        }
+                        if (comboTipo.getValue() == null) {
+                            throw new CampoVacioException("Tipo");
+                        }
+
+                        Integer id = Integer.parseInt(txtId.getText().trim());
+                        String descripcion = txtDescripcion.getText().trim();
+                        LocalDate fecha = dateFecha.getValue();
+                        Integer idBus = comboBus.getValue();
+                        String tipo = comboTipo.getValue();
+
+                        return new Mantenimiento(id, descripcion, fecha, idBus, tipo);
+                    } catch (MantenimientoException | NumberFormatException ex) {
+                        registrarExcepcion(ex);
+                        mostrarAlerta("Error de validación", ex instanceof MantenimientoException ?
+                                ex.getMessage() : "Error en el formato de los datos.");
+                        return null;
+                    }
+                }
+                return null;
+            });
+
+            Optional<Mantenimiento> resultado = dialog.showAndWait();
+
+            resultado.ifPresent(mantenimientoActualizado -> {
+                try {
+                    // Actualizar en la lista local
+                    int indice = listaMantenimientos.indexOf(mantenimiento);
+                    if (indice >= 0) {
+                        listaMantenimientos.set(indice, mantenimientoActualizado);
+                    }
+                    
+                    // Refrescar tabla
+                    tablaMantenimientos.refresh();
+                    
+                    mostrarInfo("Éxito", "Mantenimiento actualizado correctamente.");
+                } catch (Exception ex) {
+                    registrarExcepcion(ex);
+                    mostrarAlerta("Error", "Error al actualizar el mantenimiento: " + ex.getMessage());
+                }
+            });
+
+        } catch (Exception ex) {
+            registrarExcepcion(ex);
+            mostrarAlerta("Error", "Error al mostrar el formulario: " + ex.getMessage());
+        }
+    }
+
+    private void eliminarMantenimiento() throws MantenimientoException {
+        Mantenimiento mantenimientoSeleccionado = tablaMantenimientos.getSelectionModel().getSelectedItem();
+        if (mantenimientoSeleccionado == null) {
+            throw new NoSeleccionException();
+        }
+
+        // Confirmación antes de eliminar
+        if (confirmarAccion("Confirmar eliminación", "¿Está seguro de eliminar el mantenimiento #" + 
+                mantenimientoSeleccionado.getId_mantenimiento() + "?")) {
+            
+            try {
+                // Eliminar de la lista local
+                listaMantenimientos.remove(mantenimientoSeleccionado);
+                
+                // Actualizar estado de la tabla
+                actualizarEstadoNoData();
+                
+                // Mostrar mensaje de éxito
+                mostrarInfo("Éxito", "Mantenimiento eliminado correctamente.");
+                
+            } catch (Exception ex) {
+                registrarExcepcion(ex);
+                throw new MantenimientoException("Error al eliminar mantenimiento: " + ex.getMessage());
+            }
+        }
     }
 
     public static void main(String[] args) {
