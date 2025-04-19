@@ -16,8 +16,9 @@ public class paginaPrincipal {
         Button busesBtn = new Button("Datos sobre buses");
         busesBtn.setId("boton-grande");
         busesBtn.setOnAction(e -> {
-            Scene escenaLogin = iniciarSesion.crearEscena(stage);
-            App.cambiarEscena(escenaLogin, "Inicio de Sesión");
+            GestionBuses gestionBuses = new GestionBuses();
+            Scene escenaBuses = gestionBuses.crearEscena(stage);
+            App.cambiarEscena(escenaBuses, "Gestion de buses");
         });
 
         Button paqueteriaBtn = new Button("Datos sobre paqueteria");
@@ -38,15 +39,15 @@ public class paginaPrincipal {
         Button viajesBtn = new Button("Datos sobre viajes");
         viajesBtn.setId("boton-grande");
         viajesBtn.setOnAction(e -> {
-            Scene escenaLogin = iniciarSesion.crearEscena(stage);
-            App.cambiarEscena(escenaLogin, "Inicio de Sesión");
+            Scene escenaViajes = viajes.crearEscena(stage);  
+            App.cambiarEscena(escenaViajes, "Listado de Viajes");  
         });
 
         Button empleadosBtn = new Button("Datos sobre empleados");
         empleadosBtn.setId("boton-grande");
         empleadosBtn.setOnAction(e -> {
-            Scene escenaLogin = iniciarSesion.crearEscena(stage);
-            App.cambiarEscena(escenaLogin, "Inicio de Sesión");
+            Scene escenaGestionEmpleados = empleados.crearEscena(stage);
+            App.cambiarEscena(escenaGestionEmpleados, "Gestión de Empleados");
         });
 
         Button empresasBtn = new Button("Datos sobre empresas");
@@ -63,6 +64,14 @@ public class paginaPrincipal {
             GestionMantenimientos gestion = new GestionMantenimientos();
             Scene escenaMantenimiento = gestion.crearEscena(stage); 
             App.cambiarEscena(escenaMantenimiento, "Gestión de Mantenimentos");
+        });
+
+        Button rutasBtn = new Button("Datos sobre rutas");
+        rutasBtn.setId("boton-grande");
+        rutasBtn.setOnAction(e -> {
+            GestionRutas gestionRutas = new GestionRutas();
+            Scene escenaGestionRutas = gestionRutas.crearEscena(stage);
+            App.cambiarEscena(escenaGestionRutas, "Gestion de rutas");
         });
 
         Button comprarEnvioBtn = new Button("Comprar Envio");
@@ -111,10 +120,11 @@ public class paginaPrincipal {
         grid.add(empleadosBtn, 0, 2);
         grid.add(empresasBtn, 1, 2);
         grid.add(mantenimientoBtn, 0, 3);
-        grid.add(comprarEnvioBtn, 1, 3);
-        grid.add(comprarBoletoBtn, 0, 4);
-        grid.add(boletosBtn, 1, 4);
-        grid.add(detallesBoletosBtn, 0, 5);
+        grid.add(rutasBtn, 1, 3);
+        grid.add(comprarEnvioBtn, 0, 4);
+        grid.add(comprarBoletoBtn, 1, 4);
+        grid.add(boletosBtn, 0, 5);
+        grid.add(detallesBoletosBtn, 1, 5);
 
         // Layout con el título y los botones
         VBox layout = new VBox(10,
